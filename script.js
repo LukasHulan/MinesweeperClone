@@ -4,7 +4,6 @@
     let board = {xMax: 32, yMax: 16};
     let cellSize = 25;
     let gameOver = 0;
-    let flagMode = false;
     let mineCount = 99;
     let flagCount = 0;
     let minesFlagged = 0;
@@ -135,11 +134,6 @@
     }
     
     function draw() {
-        let flagState = "Off";
-        if (flagMode) {
-            flagState = "On";
-        }
-        document.getElementById("flag_state_display").innerHTML = "Flag Mode: " + flagState;
         if (!gameOver) {
             for (let i = 0; i < board.xMax; i++) {
                 for (let j = 0; j < board.yMax; j++) {
@@ -179,45 +173,47 @@
             y: Math.floor(((evt.clientY - bcr.top) / (bcr.bottom - bcr.top) * element.height) / cellSize)
         };
     }
-    
-    function keyPressedEvent(event) {
-        if (event.key === " ") {
-            if (!gameOver) {
-                if (!flagMode) {
-                    flagMode = true;
-                } else {
-                    flagMode = false;
-                }
-                draw();
-            } else {
-                location.reload();
-            }
+
+    function checkWinAndUpdate() {
+        if (minesFlagged === mineCount) {
+            gameOver = 1;
         }
+        draw();
     }
     
-    function onClickEvent(event) {
+    function onLeftClickEvent(event) {
+        let pos = getMouseCords(canvas, event);
+        if (event.button === 0 && !gameOver && grid[pos.x] != undefined && grid[pos.x][pos.y] != undefined) {
+            uncoverCell(pos.x, pos.y);
+            if (grid[pos.x][pos.y].flagged === true) {
+                grid[pos.x][pos.y].flagged = false;
+                flagCount--;
+                if (grid[pos.x][pos.y].value === 9) {
+                    minesFlagged--;
+                }
+            }
+            checkWinAndUpdate();
+        }
+    }
+
+    function onRightClickEvent(event) {
         let pos = getMouseCords(canvas, event);
         if (!gameOver && grid[pos.x] != undefined && grid[pos.x][pos.y] != undefined) {
-            if (!flagMode) {
-                uncoverCell(pos.x, pos.y);
-                if (grid[pos.x][pos.y].flagged === true) {
-                    grid[pos.x][pos.y].flagged = false;
-                    flagCount--;
-                    if (grid[pos.x][pos.y].value === 9) {
-                        minesFlagged--;
-                    }
-                }
-            } else if (grid[pos.x][pos.y].covered && !grid[pos.x][pos.y].flagged) {
+            event.preventDefault();
+            if (grid[pos.x][pos.y].covered && !grid[pos.x][pos.y].flagged) {
                 grid[pos.x][pos.y].flagged = true;
                 flagCount++;
                 if (grid[pos.x][pos.y].value === 9) {
                     minesFlagged++;
                 }
             }
-            if (minesFlagged === mineCount) {
-                gameOver = 1;
-            }
-            draw();
+            checkWinAndUpdate();
+        }
+    }
+
+    function onKeyPressEvent(event) {
+        if (event.key === " " && gameOver) {
+            location.reload();
         }
     }
     
@@ -247,7 +243,8 @@
         }
     }
     
-    addEventListener("keydown", keyPressedEvent);
-    addEventListener("click", onClickEvent);
+    addEventListener("click", onLeftClickEvent);
+    addEventListener("contextmenu", onRightClickEvent);
+    addEventListener("keypress", onKeyPressEvent);
     draw();
 })();
