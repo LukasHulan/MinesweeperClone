@@ -81,7 +81,7 @@
                             break;
                     }
                     ctx.textAlign = "center";
-                    ctx.font = "20px serif";
+                    ctx.font = "20px sans-serif";
                     ctx.fillText(this.value, this.x + (cellSize / 2), this.y + (cellSize * 0.75), cellSize);
                 }
             }
@@ -135,11 +135,11 @@
     }
     
     function draw() {
-        let flagState = "off";
+        let flagState = "Off";
         if (flagMode) {
-            flagState = "on";
+            flagState = "On";
         }
-        document.getElementById("flag_state_display").innerHTML = "Flag mode: " + flagState;
+        document.getElementById("flag_state_display").innerHTML = "Flag Mode: " + flagState;
         if (!gameOver) {
             for (let i = 0; i < board.xMax; i++) {
                 for (let j = 0; j < board.yMax; j++) {
@@ -169,7 +169,7 @@
             }
             document.getElementById("info_display").innerHTML = "Press [space] to play again.";
         }
-        document.getElementById("mine_display").innerHTML = "Mines flagged: " + flagCount + "/" + mineCount;
+        document.getElementById("mine_display").innerHTML = "Mines Flagged: " + flagCount + "/" + mineCount;
     }
     
     function getMouseCords(element, evt) {
@@ -196,8 +196,8 @@
     }
     
     function onClickEvent(event) {
-        if (!gameOver) {
-            let pos = getMouseCords(canvas, event);
+        let pos = getMouseCords(canvas, event);
+        if (!gameOver && grid[pos.x] != undefined && grid[pos.x][pos.y] != undefined) {
             if (!flagMode) {
                 uncoverCell(pos.x, pos.y);
                 if (grid[pos.x][pos.y].flagged === true) {
